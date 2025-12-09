@@ -9,23 +9,26 @@ use App\ValueObjects\Availability;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
-        'user',
-        'weekly_hours'
+        'name',
+        'pin',
+        'weekly_hours',
     ];
+
     protected $with = [
         'roles',
         'availabilityRules'
     ];
 
-    public string $name;
-
-    public function user(): BelongsTo
+    public function establishments(): BelongsToMany
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(Establishment::class);
     }
 
     public function roles(): BelongsToMany

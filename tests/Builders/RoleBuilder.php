@@ -2,13 +2,13 @@
 
 namespace Tests\Builders;
 
+use App\Models\Company;
 use App\Models\Role;
 
 class RoleBuilder
 {
-    private static int $idCounter = 1;
-
     private string $title = 'server';
+    private ?Company $company = null;
 
     public static function create(): self
     {
@@ -21,13 +21,22 @@ class RoleBuilder
         return $this;
     }
 
+    public function forCompany(Company $company): self
+    {
+        $this->company = $company;
+        return $this;
+    }
+
     public function build(): Role
     {
-        $role = new Role();
+        // Create a default company if none provided
+        if ($this->company === null) {
+            $this->company = Company::create(['name' => 'Test Company']);
+        }
 
-        $role->id = self::$idCounter++;
-        $role->title = $this->title;
-
-        return $role;
+        return Role::create([
+            'company_id' => $this->company->id,
+            'title' => $this->title,
+        ]);
     }
 }

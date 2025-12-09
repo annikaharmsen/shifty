@@ -2,16 +2,35 @@
 
 An intelligent employee scheduling system for restaurants and hospitality establishments. Shifty automates weekly shift scheduling using constraint-based algorithms that balance employee availability, preferred hours, role requirements, and fair workload distribution.
 
+Built with full database persistence and multi-tenant architecture, Shifty supports multiple companies with independent establishments, comprehensive soft delete restoration, and historical data integrity.
+
 ## Features
 
-- **Automated Schedule Generation** - Constraint-based algorithm assigns shifts while respecting availability, roles, and weekly hour targets
+### Scheduling Intelligence
+
+- **Automated Schedule Generation** - Constraint-based backtracking algorithm assigns shifts while respecting availability, roles, and weekly hour targets
 - **Flexible Availability Management** - Recurring availability rules with support for daily, weekly, and monthly patterns
-- **Role-Based Scheduling** - Multi-role support ensures the right qualified employee is assigned to each shift
+- **Role-Based Scheduling** - Multi-role support with proficiency rating foundation for future smart matching
 - **Schedule Templates** - Define reusable shift patterns for typical weeks or seasonal variations
+- **Volume Rating System** - Track shift difficulty and demand levels (1-10 scale) for intelligent employee-shift matching
 - **On-Call Shift Support** - Differentiated handling for backup shifts with deprioritized assignment
 - **Weekly Hours Balancing** - Tracks and optimizes employee utilization to match target weekly hours
 - **Conflict Detection** - Identifies impossible-to-schedule shifts before assignment
-- **Comprehensive Testing** - 100+ automated tests ensure reliable scheduling logic
+
+### Database & Architecture
+
+- **Multi-Tenant Architecture** - Support for multiple companies with independent establishments
+- **Full Database Persistence** - All domain models backed by SQLite (dev) and MySQL (production)
+- **Soft Deletes with Restoration** - Archive and restore schedules, shifts, employees, and templates while preserving historical data
+- **Foreign Key Constraints** - RESTRICT prevents deletion of roles/employees referenced in historical shifts; CASCADE handles relationship cleanup
+- **Historical Data Integrity** - Past schedules preserve references even when employees/roles are archived
+
+### Development & Testing
+
+- **Comprehensive Test Coverage** - 84 tests with 400+ assertions covering all domain logic
+- **Realistic Test Data** - Custom builders and generators create multi-employee scenarios
+- **Database Testing** - RefreshDatabase ensures clean state for every test
+- **Development Seeder** - Quickly populate realistic multi-company test data
 
 ## Tech Stack
 
@@ -82,8 +101,8 @@ This starts:
 - **Establishment** - Individual location with schedules and templates
 - **Employee** - Staff with availability rules, roles, and weekly hour targets
 - **Schedule** - Weekly shift schedule for an establishment
-- **ScheduleTemplate** - Reusable pattern defining standard shifts
-- **Shift** - Individual work assignment with time, role, and optional assignee
+- **ScheduleTemplate** - Reusable pattern defining standard shifts with volume ratings
+- **Shift** - Individual work assignment with time, role, optional assignee, and volume rating
 - **AvailabilityRule** - Time-based rule for employee availability (one-time or recurring)
 - **Role** - Job function (server, cook, bartender, etc.)
 
@@ -161,18 +180,28 @@ Test builders and generators create realistic test data:
 
 ## Roadmap
 
-**Current Status:** Core scheduling engine complete with backtracking algorithm and utilization tracking. In active development.
+**Current Status:** Core scheduling engine complete with full database persistence, multi-tenant architecture, and utilization tracking. In active development.
+
+**Recently Completed:**
+- [x] Full database persistence layer with migrations for all domain models
+- [x] Multi-tenant architecture (Company → Establishment → Employee hierarchy)
+- [x] Soft deletes with cascade behavior and restoration
+- [x] Foreign key constraints with RESTRICT/CASCADE strategies
+- [x] Volume rating system for shift difficulty tracking
+- [x] Comprehensive test suite with RefreshDatabase (84 tests, 400+ assertions)
+- [x] Development seeder for realistic multi-company test data
 
 **Next Milestones:**
 
-- [ ] More flexible employee schedulability restraints (max-hours, target hour error margin, time between shifts, etc.)
+- [ ] Integrate volume ratings and proficiency ratings into auto-scheduler for intelligent employee-shift matching
+- [ ] More flexible employee schedulability constraints (max-hours, target hour error margin, minimum time between shifts, etc.)
 - [ ] REST API endpoints for schedule CRUD operations
 - [ ] User authentication and authorization
-- [ ] Frontend UI for schedule management
+- [ ] Frontend UI for schedule management and volume rating assignment
 - [ ] Employee feedback system for continuous improvement
 - [ ] Manager override capabilities
 - [ ] Analytics and reporting dashboard
-- [ ] Multi-establishment scheduling support
+- [ ] Cross-establishment employee sharing/borrowing
 - [ ] Shift swap and trade functionality
 
 ## Contributing

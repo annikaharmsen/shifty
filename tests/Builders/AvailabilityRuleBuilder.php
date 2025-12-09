@@ -65,11 +65,18 @@ class AvailabilityRuleBuilder
             $end = $firstOccuranceEnd->addYear();
         }
 
-        $rule->id = self::$idCounter++;
+        // Convert duration to seconds for database storage
+        $durationSeconds = (int) $duration->totalSeconds;
+
+        // Convert frequency to seconds for database storage
+        $frequencyInterval = CarbonInterval::make($this->frequency);
+        $frequencySeconds = (int) $frequencyInterval->totalSeconds;
+
+        // Don't set employee_id here - it will be set by EmployeeBuilder
         $rule->is_available = $this->isAvailable;
         $rule->start_datetime = $this->start;
-        $rule->duration = $this->duration;
-        $rule->frequency = $this->frequency;
+        $rule->duration = $durationSeconds;
+        $rule->frequency = $frequencySeconds;
         $rule->termination_datetime = $end;
 
         return $rule;

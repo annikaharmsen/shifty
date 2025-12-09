@@ -4,6 +4,7 @@ namespace Tests\Unit\Services\Scheduling;
 
 use App\Models\Schedule;
 use App\Services\Scheduling\EmployeeSorter;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Builders\EmployeeBuilder;
 use Tests\Builders\ShiftBuilder;
@@ -34,6 +35,8 @@ use Tests\TestCase;
  */
 class EmployeeSorterTest extends TestCase
 {
+    use RefreshDatabase;
+
     #[Test]
     public function calculates_schedulable_hours_correctly()
     {

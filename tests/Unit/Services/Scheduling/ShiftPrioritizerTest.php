@@ -6,6 +6,7 @@ use App\Models\Schedule;
 use App\Models\Shift;
 use App\Services\Scheduling\ShiftPrioritizer;
 use Carbon\CarbonImmutable;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Builders\RoleBuilder;
 use Tests\Generators\EmployeeGenerator;
@@ -25,6 +26,8 @@ use Tests\TestCase;
 
 class ShiftPrioritizerTest extends TestCase
 {
+    use RefreshDatabase;
+
     private ShiftPrioritizer $prioritizer;
     private Shift $sampleShift;
 
@@ -39,11 +42,27 @@ class ShiftPrioritizerTest extends TestCase
         $scheduleTemplate = ScheduleTemplateGenerator::generate($serverRole, $bartenderRole);
         $instanceShifts = $scheduleTemplate->getInstantiatedShifts(CarbonImmutable::now()->startOfWeek());
 
-        $schedule = new Schedule([
-            'shifts' => $instanceShifts
+        // Create and persist schedule with shifts
+        $schedule = Schedule::create([
+            'establishment_id' => $scheduleTemplate->establishment_id,
+            'week_start_date' => CarbonImmutable::now()->startOfWeek(),
         ]);
 
-        $this->sampleShift = $instanceShifts[5];
+        // Persist all shifts to the database
+        foreach ($instanceShifts as $shift) {
+            Shift::create([
+                'schedule_id' => $schedule->id,
+                'role_id' => $shift->role->id,
+                'start_datetime' => $shift->start_datetime,
+                'duration' => $shift->duration,
+                'is_on_call' => $shift->is_on_call,
+            ]);
+        }
+
+        // Refresh to load the shifts relationship
+        $schedule->refresh();
+
+        $this->sampleShift = $schedule->shifts[5];
 
         $this->prioritizer = new ShiftPrioritizer($employees, $schedule);
     }

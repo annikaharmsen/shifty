@@ -6,6 +6,7 @@ use App\Models\Schedule;
 use App\Models\Shift;
 use App\Services\AutoScheduleService;
 use Carbon\CarbonImmutable;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\Attributes\Test;
@@ -25,6 +26,7 @@ use Tests\TestCase;
  */
 class AutoScheduleServiceTest extends TestCase
 {
+    use RefreshDatabase;
     #[Test]
     public function schedule_assigns_all_shifts_when_employees_are_available()
     {
@@ -42,27 +44,33 @@ class AutoScheduleServiceTest extends TestCase
 
         $employees = collect([$employee1, $employee2, $employee3]);
 
-        // Create three non-overlapping shifts
+        // Create schedule first
+        $schedule = \Tests\Builders\ScheduleBuilder::create()->build();
+
+        // Create three non-overlapping shifts for this schedule
         $shift1 = ShiftBuilder::create()
+            ->forSchedule($schedule)
             ->from('2024-01-01 09:00:00')
             ->withDuration(4)
             ->forRole($serverRole)
             ->build();
 
         $shift2 = ShiftBuilder::create()
+            ->forSchedule($schedule)
             ->from('2024-01-01 14:00:00')
             ->withDuration(4)
             ->forRole($serverRole)
             ->build();
 
         $shift3 = ShiftBuilder::create()
+            ->forSchedule($schedule)
             ->from('2024-01-01 19:00:00')
             ->withDuration(4)
             ->forRole($serverRole)
             ->build();
 
-        $schedule = new Schedule();
-        $schedule->setRelation('shifts', collect([$shift1, $shift2, $shift3]));
+        // Refresh schedule to load shifts from database
+        $schedule = $schedule->fresh(['shifts']);
 
         $autoSchedule = new AutoScheduleService($schedule, $employees);
 
@@ -73,9 +81,11 @@ class AutoScheduleServiceTest extends TestCase
 
         // ASSERT
         $this->assertInstanceOf(Schedule::class, $result);
-        $this->assertTrue($shift1->isAssigned(), 'Shift 1 should be assigned');
-        $this->assertTrue($shift2->isAssigned(), 'Shift 2 should be assigned');
-        $this->assertTrue($shift3->isAssigned(), 'Shift 3 should be assigned');
+        $this->assertCount(3, $result->shifts, 'Should have 3 shifts');
+
+        foreach ($result->shifts as $shift) {
+            $this->assertTrue($shift->isAssigned(), 'Each shift should be assigned');
+        }
     }
 
     #[Test]
@@ -725,14 +735,30 @@ class AutoScheduleServiceTest extends TestCase
         $scheduleTemplate = ScheduleTemplateGenerator::generate($serverRole, $bartenderRole);
         $weekStart = CarbonImmutable::parse('2025-11-24');
         $shifts = $scheduleTemplate->getInstantiatedShifts($weekStart);
-        $shifts = $this->assignShiftIds($shifts);
 
+        // Create and persist schedule with shifts
+        $schedule = Schedule::create([
+            'establishment_id' => $scheduleTemplate->establishment_id,
+            'week_start_date' => $weekStart,
+        ]);
 
-        // Take only server shifts (since we only have one server available)
-        $serverShifts = $shifts->filter(fn ($shift) => $shift->role === $serverRole)->take(10);
+        // Take only server shifts (since we only have one server available) and persist them
+        $serverShiftCount = 0;
+        foreach ($shifts as $shift) {
+            if ($shift->role->id === $serverRole->id && $serverShiftCount < 10) {
+                Shift::create([
+                    'schedule_id' => $schedule->id,
+                    'role_id' => $shift->role->id,
+                    'start_datetime' => $shift->start_datetime,
+                    'duration' => $shift->duration,
+                    'is_on_call' => $shift->is_on_call,
+                ]);
+                $serverShiftCount++;
+            }
+        }
 
-        $schedule = new Schedule();
-        $schedule->setRelation('shifts', $serverShifts);
+        // Refresh to load the shifts relationship
+        $schedule->refresh();
 
         $autoSchedule = new AutoScheduleService($schedule, $employees);
 

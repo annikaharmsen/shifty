@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Role extends Model
+class Establishment extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
         'company_id',
-        'title',
+        'name',
+        'address',
     ];
 
     public function company(): BelongsTo
@@ -24,18 +25,16 @@ class Role extends Model
 
     public function employees(): BelongsToMany
     {
-        return $this->belongsToMany(Employee::class)
-            ->withPivot('proficiency_rating')
-            ->withTimestamps();
+        return $this->belongsToMany(Employee::class);
     }
 
-    public function shifts(): HasMany
+    public function schedules(): HasMany
     {
-        return $this->hasMany(Shift::class);
+        return $this->hasMany(Schedule::class);
     }
 
-    public function templateShifts(): HasMany
+    public function scheduleTemplates(): HasMany
     {
-        return $this->hasMany(TemplateShift::class);
+        return $this->hasMany(ScheduleTemplate::class);
     }
 }

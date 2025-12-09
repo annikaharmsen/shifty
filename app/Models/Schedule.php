@@ -4,13 +4,30 @@ namespace App\Models;
 
 use App\ValueObjects\Timeblock;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
 class Schedule extends Model
 {
-    protected $fillable = ['shifts'];
+    use SoftDeletes;
+
+    protected $fillable = [
+        'establishment_id',
+        'week_start_date',
+    ];
+
+    protected $casts = [
+        'week_start_date' => 'date',
+    ];
+
     protected $with = ['shifts'];
+
+    public function establishment(): BelongsTo
+    {
+        return $this->belongsTo(Establishment::class);
+    }
 
     public function shifts(): HasMany
     {
@@ -58,8 +75,24 @@ class Schedule extends Model
     {
         $shiftNum = 1;
         /** @var Collection $this->shifts */
-        return 'Schedule:' . $this->shifts ?
-            $this->shifts->reduce(fn ($prev, $shift, $key) => $prev . PHP_EOL . 'Shift ' . $key + 1 . ': ' . $shift->toString()) :
-            PHP_EOL . 'no shifts found';
+        return 'Schedule:' . ($this->shifts->isNotEmpty() ?
+            $this->shifts->reduce(fn ($prev, $shift, $key) => $prev . PHP_EOL . 'Shift ' . $key + 1 . ': ' . $shift->toString(), '') :
+            PHP_EOL . 'no shifts found');
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Schedule $schedule) {
+            if ($schedule->isForceDeleting()) {
+                return;
+            }
+            // Soft delete all shifts when schedule is soft deleted
+            $schedule->shifts()->delete();
+        });
+
+        static::restoring(function (Schedule $schedule) {
+            // Restore all shifts when schedule is restored
+            $schedule->shifts()->withTrashed()->restore();
+        });
     }
 }

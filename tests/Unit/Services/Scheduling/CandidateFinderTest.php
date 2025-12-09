@@ -7,6 +7,7 @@ use App\Services\Scheduling\CandidateFinder;
 use App\ValueObjects\Timeblock;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\Builders\AvailabilityRuleBuilder;
 use Tests\Builders\EmployeeBuilder;
@@ -24,6 +25,7 @@ use Tests\TestCase;
 
 class CandidateFinderTest extends TestCase
 {
+    use RefreshDatabase;
     #[Test]
     public function detects_when_employee_is_scheduled_during_timeblock()
     {

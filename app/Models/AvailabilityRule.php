@@ -6,20 +6,35 @@ use App\ValueObjects\RecurringTimeblock;
 use App\ValueObjects\Timeblock;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AvailabilityRule extends Model
 {
+    use SoftDeletes;
+
     public const UNAVAILABLE = false;
     public const AVAILABLE = true;
 
     protected $fillable = [
+        'employee_id',
         'is_available',
         'start_datetime',
         'duration',
         'frequency',
         'termination_datetime',
-        'employee_id'
     ];
+
+    protected $casts = [
+        'start_datetime' => 'datetime',
+        'termination_datetime' => 'datetime',
+        'is_available' => 'boolean',
+    ];
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
 
     public function timeblock(): Attribute
     {
@@ -27,16 +42,16 @@ class AvailabilityRule extends Model
             return Attribute::make(
                 fn () => new Timeblock(
                     $this->start_datetime,
-                    $this->duration,
+                    $this->duration . ' seconds',
                 )
-            ) ;
+            );
         } else {
             return Attribute::make(
                 fn () => new RecurringTimeblock(
-                    $this->start_datetime,
-                    $this->duration,
-                    $this->frequency,
-                    $this->termination_datetime
+                    $this->start_datetime->toIso8601String(),
+                    $this->duration . ' seconds',
+                    $this->frequency . ' seconds',
+                    $this->termination_datetime->toIso8601String()
                 )
             );
         }

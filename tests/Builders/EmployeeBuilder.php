@@ -4,17 +4,19 @@ namespace Tests\Builders;
 
 use App\Models\AvailabilityRule;
 use App\Models\Employee;
+use App\Models\Establishment;
 use App\Models\Role;
 use Illuminate\Support\Collection;
 
 class EmployeeBuilder
 {
-    private static int $idCounter = 1;
+    private static int $pinCounter = 1000;
 
     private string $name = 'Unnamed Employee';
     private float $weeklyHours = 30;
     private array $availabilityRules = [];
     private array $roles = [];
+    private ?Establishment $establishment = null;
 
     public static function create(): self
     {
@@ -63,17 +65,40 @@ class EmployeeBuilder
         return $this;
     }
 
+    public function atEstablishment(Establishment $establishment): self
+    {
+        $this->establishment = $establishment;
+        return $this;
+    }
+
     public function build(): Employee
     {
-        $employee = new Employee();
+        // Create employee
+        $employee = Employee::create([
+            'name' => $this->name,
+            'pin' => (string) self::$pinCounter++,
+            'weekly_hours' => $this->weeklyHours,
+        ]);
 
-        $employee->id = self::$idCounter++;
-        $employee->name = $this->name;
-        $employee->weekly_hours = $this->weeklyHours;
+        // Attach roles (deduplicate by ID to avoid constraint violations)
+        if (!empty($this->roles)) {
+            $roleIds = collect($this->roles)->pluck('id')->unique()->all();
+            $employee->roles()->attach($roleIds);
+            $employee->setRelation('roles', collect($this->roles)->unique('id')->values());
+        }
 
-        $employee->setRelation('roles', collect($this->roles));
+        // Attach to establishment if provided
+        if ($this->establishment !== null) {
+            $employee->establishments()->attach($this->establishment->id);
+        }
+
+        // Create availability rules
+        foreach ($this->availabilityRules as $rule) {
+            $rule->employee_id = $employee->id;
+            $rule->save();
+        }
         $employee->setRelation('availabilityRules', collect($this->availabilityRules));
 
-        return $employee;
+        return $employee->fresh(['roles', 'availabilityRules']);
     }
 }

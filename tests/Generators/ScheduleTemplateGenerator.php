@@ -3,6 +3,7 @@
 namespace Tests\Generators;
 
 use App\Models\ScheduleTemplate;
+use Tests\Builders\ScheduleTemplateBuilder;
 use Tests\Builders\TemplateShiftBuilder;
 
 class ScheduleTemplateGenerator
@@ -18,45 +19,46 @@ class ScheduleTemplateGenerator
 
     public static function generate($serverRole, $bartenderRole): ScheduleTemplate
     {
-        $template = new ScheduleTemplate();
+        $template = ScheduleTemplateBuilder::create()->withName('Generated Schedule Template')->build();
 
         $shifts = [
             // Monday
-            ...self::createMondayShifts($serverRole, $bartenderRole),
+            ...self::createMondayShifts($serverRole, $bartenderRole, $template),
 
             // Tuesday
-            ...self::createTuesdayShifts($serverRole, $bartenderRole),
+            ...self::createTuesdayShifts($serverRole, $bartenderRole, $template),
 
             // Wednesday
-            ...self::createWednesdayShifts($serverRole, $bartenderRole),
+            ...self::createWednesdayShifts($serverRole, $bartenderRole, $template),
 
             // Thursday
-            ...self::createThursdayShifts($serverRole, $bartenderRole),
+            ...self::createThursdayShifts($serverRole, $bartenderRole, $template),
 
             // Friday
-            ...self::createFridayShifts($serverRole, $bartenderRole),
+            ...self::createFridayShifts($serverRole, $bartenderRole, $template),
 
             // Saturday
-            ...self::createSaturdayShifts($serverRole, $bartenderRole),
+            ...self::createSaturdayShifts($serverRole, $bartenderRole, $template),
 
             // Sunday
-            ...self::createSundayShifts($serverRole, $bartenderRole),
+            ...self::createSundayShifts($serverRole, $bartenderRole, $template),
 
             // On-Call Shifts
-            ...self::createOnCallShifts($serverRole, $bartenderRole),
+            ...self::createOnCallShifts($serverRole, $bartenderRole, $template),
         ];
 
-        // Set the relationship in memory without persisting to database
-        $template->setRelation('templateShifts', collect($shifts));
+        // Refresh to get all template shifts from database
+        $template = $template->fresh(['templateShifts']);
 
         return $template;
     }
 
-    private static function createMondayShifts($serverRole, $bartenderRole): array
+    private static function createMondayShifts($serverRole, $bartenderRole, $template): array
     {
         return [
             // Lunch Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::MONDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -64,6 +66,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::MONDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -73,6 +76,7 @@ class ScheduleTemplateGenerator
 
             // Dinner Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::MONDAY)
                 ->startsAt('16 hours')
                 ->withDuration('5 hours')
@@ -80,6 +84,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::MONDAY)
                 ->startsAt('17 hours')
                 ->withDuration('5 hours')
@@ -87,6 +92,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::MONDAY)
                 ->startsAt('16 hours')
                 ->withDuration('7 hours')
@@ -96,11 +102,12 @@ class ScheduleTemplateGenerator
         ];
     }
 
-    private static function createTuesdayShifts($serverRole, $bartenderRole): array
+    private static function createTuesdayShifts($serverRole, $bartenderRole, $template): array
     {
         return [
             // Lunch Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::TUESDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -108,6 +115,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::TUESDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -117,6 +125,7 @@ class ScheduleTemplateGenerator
 
             // Dinner Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::TUESDAY)
                 ->startsAt('16 hours')
                 ->withDuration('5 hours')
@@ -124,6 +133,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::TUESDAY)
                 ->startsAt('17 hours')
                 ->withDuration('5 hours')
@@ -131,6 +141,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::TUESDAY)
                 ->startsAt('16 hours')
                 ->withDuration('7 hours')
@@ -140,11 +151,12 @@ class ScheduleTemplateGenerator
         ];
     }
 
-    private static function createWednesdayShifts($serverRole, $bartenderRole): array
+    private static function createWednesdayShifts($serverRole, $bartenderRole, $template): array
     {
         return [
             // Lunch Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::WEDNESDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -152,6 +164,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::WEDNESDAY)
                 ->startsAt('12 hours')
                 ->withDuration('4 hours')
@@ -159,6 +172,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::WEDNESDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -168,6 +182,7 @@ class ScheduleTemplateGenerator
 
             // Dinner Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::WEDNESDAY)
                 ->startsAt('16 hours')
                 ->withDuration('5 hours')
@@ -175,6 +190,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::WEDNESDAY)
                 ->startsAt('17 hours')
                 ->withDuration('5 hours')
@@ -182,6 +198,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::WEDNESDAY)
                 ->startsAt('18 hours')
                 ->withDuration('4 hours')
@@ -189,6 +206,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::WEDNESDAY)
                 ->startsAt('16 hours')
                 ->withDuration('8 hours')
@@ -198,11 +216,12 @@ class ScheduleTemplateGenerator
         ];
     }
 
-    private static function createThursdayShifts($serverRole, $bartenderRole): array
+    private static function createThursdayShifts($serverRole, $bartenderRole, $template): array
     {
         return [
             // Lunch Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -210,6 +229,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('12 hours')
                 ->withDuration('4 hours')
@@ -217,6 +237,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -226,6 +247,7 @@ class ScheduleTemplateGenerator
 
             // Dinner Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('16 hours')
                 ->withDuration('5 hours')
@@ -233,6 +255,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('17 hours')
                 ->withDuration('5 hours')
@@ -240,6 +263,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('17 hours')
                 ->withDuration('6 hours')
@@ -247,6 +271,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('16 hours')
                 ->withDuration('8 hours')
@@ -254,6 +279,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('18 hours')
                 ->withDuration('7 hours')
@@ -263,11 +289,12 @@ class ScheduleTemplateGenerator
         ];
     }
 
-    private static function createFridayShifts($serverRole, $bartenderRole): array
+    private static function createFridayShifts($serverRole, $bartenderRole, $template): array
     {
         return [
             // Lunch Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -275,6 +302,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('12 hours')
                 ->withDuration('4 hours')
@@ -282,6 +310,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -291,6 +320,7 @@ class ScheduleTemplateGenerator
 
             // Dinner Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('16 hours')
                 ->withDuration('5 hours')
@@ -298,6 +328,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('16 hours')
                 ->withDuration('6 hours')
@@ -305,6 +336,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('17 hours')
                 ->withDuration('6 hours')
@@ -312,6 +344,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('18 hours')
                 ->withDuration('5 hours')
@@ -319,6 +352,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('18 hours')
                 ->withDuration('6 hours')
@@ -326,6 +360,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('16 hours')
                 ->withDuration('9 hours')
@@ -333,6 +368,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('17 hours')
                 ->withDuration('9 hours')
@@ -342,11 +378,12 @@ class ScheduleTemplateGenerator
         ];
     }
 
-    private static function createSaturdayShifts($serverRole, $bartenderRole): array
+    private static function createSaturdayShifts($serverRole, $bartenderRole, $template): array
     {
         return [
             // Brunch Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('09 hours')
                 ->withDuration('7 hours')
@@ -354,6 +391,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('10 hours')
                 ->withDuration('6 hours')
@@ -361,6 +399,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -368,6 +407,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('09 hours')
                 ->withDuration('7 hours')
@@ -377,6 +417,7 @@ class ScheduleTemplateGenerator
 
             // Dinner Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('16 hours')
                 ->withDuration('6 hours')
@@ -384,6 +425,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('16 hours')
                 ->withDuration('7 hours')
@@ -391,6 +433,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('17 hours')
                 ->withDuration('6 hours')
@@ -398,6 +441,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('17 hours')
                 ->withDuration('6 hours')
@@ -405,6 +449,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('18 hours')
                 ->withDuration('5 hours')
@@ -412,6 +457,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('16 hours')
                 ->withDuration('9 hours')
@@ -419,6 +465,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('17 hours')
                 ->withDuration('9 hours')
@@ -428,11 +475,12 @@ class ScheduleTemplateGenerator
         ];
     }
 
-    private static function createSundayShifts($serverRole, $bartenderRole): array
+    private static function createSundayShifts($serverRole, $bartenderRole, $template): array
     {
         return [
             // Brunch Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('09 hours')
                 ->withDuration('7 hours')
@@ -440,6 +488,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('10 hours')
                 ->withDuration('6 hours')
@@ -447,6 +496,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('11 hours')
                 ->withDuration('5 hours')
@@ -454,6 +504,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('12 hours')
                 ->withDuration('4 hours')
@@ -461,6 +512,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('09 hours')
                 ->withDuration('7 hours')
@@ -470,6 +522,7 @@ class ScheduleTemplateGenerator
 
             // Dinner Service
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('16 hours')
                 ->withDuration('5 hours')
@@ -477,6 +530,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('17 hours')
                 ->withDuration('4 hours')
@@ -484,6 +538,7 @@ class ScheduleTemplateGenerator
                 ->live()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('16 hours')
                 ->withDuration('6 hours')
@@ -493,11 +548,12 @@ class ScheduleTemplateGenerator
         ];
     }
 
-    private static function createOnCallShifts($serverRole, $bartenderRole): array
+    private static function createOnCallShifts($serverRole, $bartenderRole, $template): array
     {
         return [
             // Weekday On-Call
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::MONDAY)
                 ->startsAt('16 hours')
                 ->withDuration('5 hours')
@@ -505,6 +561,7 @@ class ScheduleTemplateGenerator
                 ->onCall()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::TUESDAY)
                 ->startsAt('16 hours')
                 ->withDuration('5 hours')
@@ -512,6 +569,7 @@ class ScheduleTemplateGenerator
                 ->onCall()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::WEDNESDAY)
                 ->startsAt('17 hours')
                 ->withDuration('5 hours')
@@ -519,6 +577,7 @@ class ScheduleTemplateGenerator
                 ->onCall()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::THURSDAY)
                 ->startsAt('17 hours')
                 ->withDuration('5 hours')
@@ -528,6 +587,7 @@ class ScheduleTemplateGenerator
 
             // Weekend On-Call
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('17 hours')
                 ->withDuration('6 hours')
@@ -535,6 +595,7 @@ class ScheduleTemplateGenerator
                 ->onCall()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::FRIDAY)
                 ->startsAt('17 hours')
                 ->withDuration('9 hours')
@@ -542,6 +603,7 @@ class ScheduleTemplateGenerator
                 ->onCall()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('10 hours')
                 ->withDuration('6 hours')
@@ -549,6 +611,7 @@ class ScheduleTemplateGenerator
                 ->onCall()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SATURDAY)
                 ->startsAt('17 hours')
                 ->withDuration('6 hours')
@@ -556,6 +619,7 @@ class ScheduleTemplateGenerator
                 ->onCall()
                 ->build(),
             TemplateShiftBuilder::create()
+                ->forScheduleTemplate($template)
                 ->onDayOfWeek(self::SUNDAY)
                 ->startsAt('10 hours')
                 ->withDuration('6 hours')
